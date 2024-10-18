@@ -16,8 +16,8 @@ namespace logging {
 
 	inline void init() {
 		using namespace spdlog;
-		auto file_sink = std::make_shared<sinks::basic_file_sink_mt>(get_log_filename("default"), true);
-		set_default_logger(std::make_shared<logger>("default", sinks_init_list{console_sink, file_sink}));
+		auto file_sink = std::make_shared<sinks::basic_file_sink_mt>(get_log_filename("root"), true);
+		set_default_logger(std::make_shared<logger>("root", sinks_init_list{console_sink, file_sink}));
 	}
 
 	inline shared_ptr<spdlog::logger> create_logger(const std::string& name) {
@@ -26,6 +26,10 @@ namespace logging {
 		logger->set_level(spdlog::level::info);
 		logger->set_pattern("[%d-%m-%Y %H:%M:%S] %n [%^%l%$] [thread %t] %v");
 		return logger;
+	}
+
+	inline void debug(const std::string& message){
+		spdlog::debug(message);
 	}
 
 	inline void info(const std::string& message){
@@ -40,6 +44,10 @@ namespace logging {
 		spdlog::error(message);
 	}
 
+	inline void critical(const std::string& message){
+		spdlog::critical(message);
+	}
+
 }
 
 namespace crow {
@@ -49,24 +57,22 @@ namespace crow {
 
 		void log(const std::string message, const LogLevel level) override {
 			switch (level) {
-			case LogLevel::DEBUG:
+			case LogLevel::Debug:
 				logger->debug(message);
 				break;
-			case LogLevel::INFO:
+			case LogLevel::Info:
 				logger->info(message);
 				break;
-			case LogLevel::WARNING:
+			case LogLevel::Warning:
 				logger->warn(message);
 				break;
-			case LogLevel::ERROR:
+			case LogLevel::Error:
 				logger->error(message);
 				break;
-			case LogLevel::CRITICAL:
+			case LogLevel::Critical:
 				logger->critical(message);
 				break;
-			default:
-				logger->info(message);
-				break;
+			default: break;
 			}
 		}
 

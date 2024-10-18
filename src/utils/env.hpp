@@ -25,7 +25,7 @@ namespace utils {
         string line;
         while (getline(file, line)) {
             if (line.empty() || line[0] == '#') continue;
-            if (size_t delimiter_pos = line.find('='); delimiter_pos != string::npos) {
+            if (const size_t delimiter_pos = line.find('='); delimiter_pos != string::npos) {
                 string key = trim(line.substr(0, delimiter_pos));
                 string value = trim(line.substr(delimiter_pos + 1));
                 if (!value.empty() && value.front() == '"' && value.back() == '"') {
@@ -42,7 +42,7 @@ namespace utils {
             return env_vars[key];
         }
         if (const char* env_value = std::getenv(key.c_str()); env_value != nullptr) {
-            return string(env_value);
+            return { env_value };
         }
         return default_value;
     }

@@ -10,11 +10,14 @@ namespace profile {
 	private:
 		const string compile_command = utils::get_env(
 			"C17_COMPILE_COMMAND",
-			"gcc -O3 -std=c17 -static"
+			"gcc -O3 -std=c17 -static -o main.out"
 			);
 
 		void compile() {
-
+			const string command = compile_command + " main.cpp";
+			if (system(command.c_str()) != 0) {
+				throw std::runtime_error("Compilation failed");
+			}
 		}
 
 	public:

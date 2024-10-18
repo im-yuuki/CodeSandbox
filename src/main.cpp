@@ -12,8 +12,8 @@ namespace api {
         return "Hello, World!";
     }
 
-    inline std::string submit_problem() {
-        return "Hello, World!";
+    inline crow::response submit_problem(const crow::request& req) {
+        return {200, "Hello, World!"};
     }
 
     inline std::string get_result() {
@@ -24,7 +24,7 @@ namespace api {
         using namespace crow;
         const auto logger = new SpdlogLogger(logging::create_logger("crow"));
         logger::setHandler(logger);
-        App app;
+        App<> app;
         CROW_ROUTE(app, "/version").methods(HTTPMethod::GET)([]() { return APP_VERSION; });
         CROW_ROUTE(app, "/problems").methods(HTTPMethod::GET)(get_all_problems);
         CROW_ROUTE(app, "/submit").methods(HTTPMethod::POST)(submit_problem);
