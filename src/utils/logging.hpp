@@ -8,26 +8,30 @@
 
 namespace logging {
 
+	static string get_log_filename() {
+		using namespace chrono;
+		const auto now = system_clock::to_time_t(system_clock::now());
+		return static_cast<string>("logs/" + now) + ".log";
+	}
+
+	// Shared sinks
 	const static auto console_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
-
-	inline string get_log_filename(const string& name) {
-		return "logs/"+ name + ".txt";
-	}
-
-	inline void init() {
-		using namespace spdlog;
-		auto file_sink = std::make_shared<sinks::basic_file_sink_mt>(get_log_filename("root"), true);
-		set_default_logger(std::make_shared<logger>("root", sinks_init_list{console_sink, file_sink}));
-	}
+	const static auto file_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(get_log_filename(), true);
 
 	inline shared_ptr<spdlog::logger> create_logger(const std::string& name) {
-		auto file_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(get_log_filename(name), true);
 		const auto logger = std::make_shared<spdlog::logger>(spdlog::logger(name, { console_sink, file_sink }));
 		logger->set_level(spdlog::level::info);
 		logger->set_pattern("[%d-%m-%Y %H:%M:%S] %n [%^%l%$] [thread %t] %v");
 		return logger;
 	}
 
+	inline void init() {
+		// Initialize the default logger
+		using namespace spdlog;
+		set_default_logger(create_logger("default"));
+	}
+
+	// Default logger functions
 	inline void debug(const std::string& message){
 		spdlog::debug(message);
 	}
@@ -52,6 +56,7 @@ namespace logging {
 
 namespace crow {
 	class SpdlogLogger final : public ILogHandler {
+		// Route logging to spdlog
 	public:
 		explicit SpdlogLogger(const std::shared_ptr<spdlog::logger>& logger) : logger(logger) {}
 

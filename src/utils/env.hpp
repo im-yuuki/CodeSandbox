@@ -12,6 +12,7 @@ namespace utils {
     static map<string, string> env_vars;
 
     inline string trim(const string& str) {
+        // Remove leading and trailing spaces
         const size_t first = str.find_first_not_of(' ');
         if (first == string::npos) return "";
         const size_t last = str.find_last_not_of(' ');
@@ -19,6 +20,7 @@ namespace utils {
     }
 
     inline void load_env(const string& env_file = ".env") {
+        // Parse the environment file
         ifstream file(env_file);
         if (!file.is_open()) return;
 
@@ -38,6 +40,7 @@ namespace utils {
     }
 
     inline string get_env(const string& key, const string& default_value = "") {
+        // Get the value of an environment variable, or return the default value if it doesn't exist
         if (env_vars.contains(key)) {
             return env_vars[key];
         }

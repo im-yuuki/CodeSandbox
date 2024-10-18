@@ -3,6 +3,7 @@
 #include <crow.h>
 #include <string>
 
+#include "data/problems.hpp"
 #include "utils/compare.hpp"
 #include "utils/env.hpp"
 #include "utils/logging.hpp"
@@ -36,6 +37,7 @@ namespace api {
 
 int main() {
     logging::init();
+    data::scan_problems();
     const int port = stoi(utils::get_env("PORT", "4000"));
     auto app = api::init();
     app.port(port).multithreaded().run();

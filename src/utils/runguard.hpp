@@ -1,185 +1,99 @@
 #ifndef RUNGUARD_HPP
 #define RUNGUARD_HPP
 
-#include <iostream>
-#include <thread>
-#include <chrono>
-#include <cstring>
-#include <cstdio>
-#include <fcntl.h>
-
-#ifdef _WIN32
-#include <windows.h>
-#include <psapi.h>
-#elif __linux__
+#include <cstdlib>
 #include <unistd.h>
-#include <fstream>
+#include <sys/resource.h>
+#include <sys/time.h>
 #include <sys/wait.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#endif
+#include <sstream>
+#include "logging.hpp"
 
-class RunGuard {
-public:
-    RunGuard(const long memory_limit_mb, const int time_limit_sec)
-        : memory_limit_kib(memory_limit_mb * 1024), time_limit_sec(time_limit_sec), child_pid(-1) {}
+namespace utils {
+	const static auto logger = logging::create_logger("runguard");
 
-    bool start(const char* command, const int input_fd = STDIN_FILENO, const int output_fd = STDOUT_FILENO, const int error_fd = STDERR_FILENO) {
-#ifdef _WIN32
-        STARTUPINFO si;
-        PROCESS_INFORMATION pi;
-        ZeroMemory(&si, sizeof(si));
-        si.cb = sizeof(si);
-        ZeroMemory(&pi, sizeof(pi));
-        if (!CreateProcess(nullptr, const_cast<char*>(command), nullptr, nullptr, TRUE, 0, nullptr, nullptr, &si, &pi)) {
-            std::cerr << "CreateProcess failed!" << std::endl;
-            return false;
-        }
+	class RunGuard {
+		unsigned time_limit_secs;
+		unsigned memory_limit_mb;
+		int status = EXIT_SUCCESS;
 
-        child_pid = pi.dwProcessId;
-        CloseHandle(pi.hProcess);
-        CloseHandle(pi.hThread);
-#else
-        if ((child_pid = fork()) == -1) {
-            std::cerr << "Fork failed!" << std::endl;
-            return false;
-        }
+	public:
+		RunGuard(const unsigned time_limit_secs, const unsigned memory_limit_mb)
+			: time_limit_secs(time_limit_secs), memory_limit_mb(memory_limit_mb) {
+		}
 
-        if (child_pid == 0) {  // Child process
-            // Redirect streams
-            if (input_fd != STDIN_FILENO) {
-                dup2(input_fd, STDIN_FILENO);
-                close(input_fd);
-            }
-            if (output_fd != STDOUT_FILENO) {
-                dup2(output_fd, STDOUT_FILENO);
-                close(output_fd);
-            }
-            if (error_fd != STDERR_FILENO) {
-                dup2(error_fd, STDERR_FILENO);
-                close(error_fd);
-            }
+		void run(const char* command, std::string& input, std::stringstream& output) {
+			int pipe_in[2];
+			int pipe_out[2];
 
-            execlp(command, command, nullptr);
-            perror("exec failed");
-            exit(1);
-        }
-#endif
-        monitor_thread = std::thread(&RunGuard::monitor_resource_limits, this);
-        monitor_thread.detach();
-        return true;
-    }
+			if (pipe(pipe_in) == -1 || pipe(pipe_out) == -1) {
+				logger->error("Failed to create pipes");
+				return;
+			}
 
-    void wait_for_completion() const {
-        if (child_pid != -1) {
-#ifdef _WIN32
-            HANDLE process = OpenProcess(SYNCHRONIZE, FALSE, child_pid);
-            if (process) {
-                WaitForSingleObject(process, INFINITE);
-                CloseHandle(process);
-            }
-            DWORD exit_code;
-            process = OpenProcess(PROCESS_QUERY_INFORMATION, FALSE, child_pid);
-            if (process) {
-                GetExitCodeProcess(process, &exit_code);
-                CloseHandle(process);
-                if (exit_code == STILL_ACTIVE) {
-                    std::cerr << "Child process was killed due to resource limit violation." << std::endl;
-                } else {
-                    std::cout << "Child process finished normally." << std::endl;
-                }
-            }
-#else
-            waitpid(child_pid, &status, 0);
-            if (WIFSIGNALED(status) && WTERMSIG(status) == SIGKILL) {
-                std::cerr << "Child process was killed due to resource limit violation." << std::endl;
-            } else {
-                std::cout << "Child process finished normally." << std::endl;
-            }
-#endif
-        }
-    }
+			const pid_t child_pid = fork();
 
-private:
-    long memory_limit_kib;
-    int time_limit_sec;
-    pid_t child_pid;
-    std::thread monitor_thread;
+			if (child_pid == 0) {
+				// In child process
+				close(pipe_in[1]); // Close write end of input pipe
+				close(pipe_out[0]); // Close read end of output pipe
 
-    static long get_memory_usage(pid_t pid) {
-#ifdef _WIN32
-        PROCESS_MEMORY_COUNTERS pmc;
-        HANDLE process = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, pid);
+				// Redirect stdin and stdout
+				dup2(pipe_in[0], STDIN_FILENO);
+				dup2(pipe_out[1], STDOUT_FILENO);
 
-        if (process == nullptr) {
-            return -1;
-        }
+				// Reset signal handler for SIGXCPU
+				struct sigaction sa{};
+				sa.sa_handler = SIG_DFL;
+				sigaction(SIGXCPU, &sa, nullptr);
 
-        if (GetProcessMemoryInfo(process, &pmc, sizeof(pmc))) {
-            CloseHandle(process);
-            return pmc.WorkingSetSize / 1024;
-        }
+				char* args[] = {const_cast<char*>(command), nullptr};
 
-        CloseHandle(process);
-        return -1;
+				// Set resource limits
+				if (memory_limit_mb) {
+					rlimit mem_limit{};
+					mem_limit.rlim_cur = memory_limit_mb * 1024 * 1024;
+					mem_limit.rlim_max = memory_limit_mb * 1024 * 1024;
+					if (setrlimit(RLIMIT_AS, &mem_limit) != 0) exit(EXIT_FAILURE);
+				}
+				if (time_limit_secs) {
+					rlimit cpu_limit{};
+					cpu_limit.rlim_cur = time_limit_secs;
+					cpu_limit.rlim_max = time_limit_secs;
+					if (setrlimit(RLIMIT_CPU, &cpu_limit) != 0) exit(EXIT_FAILURE);
+				}
 
-#elif __linux__
-        std::ifstream status_file("/proc/" + std::to_string(pid) + "/status");
-        std::string line;
-        long mem_usage_kib = 0;
+				execvp(command, args);
 
-        while (std::getline(status_file, line)) {
-            if (line.find("VmRSS:") != std::string::npos) {  // Look for resident memory
-                std::istringstream iss(line);
-                std::string label;
-                iss >> label >> mem_usage_kib;  // Read memory in KiB
-                break;
-            }
-        }
+				exit(EXIT_FAILURE);
+			}
 
-        return mem_usage_kib;  // Return memory in KiB
-#else
-        return -1;
-#endif
-    }
+			if (child_pid > 0) {
+				// In parent process
+				close(pipe_in[0]); // Close read end of input pipe
+				close(pipe_out[1]); // Close write end of output pipe
 
-    void monitor_resource_limits() const {
-        const auto start_time = std::chrono::steady_clock::now();
+				// Write to the child process's stdin
+				write(pipe_in[1], input.c_str(), input.size());
+				close(pipe_in[1]); // Close write end after writing
 
-        while (true) {
-            // Check memory usage
-            if (const long mem_usage_kib = get_memory_usage(child_pid); mem_usage_kib > 0 && mem_usage_kib > memory_limit_kib) {
-                std::cerr << "Memory limit exceeded! Killing process." << std::endl;
-#ifdef _WIN32
-                HANDLE process = OpenProcess(PROCESS_TERMINATE, FALSE, child_pid);
-                if (process) {
-                    TerminateProcess(process, 1);
-                    CloseHandle(process);
-                }
-#else
-                kill(child_pid, SIGKILL);
-#endif
-                break;
-            }
+				// Read from the child process's stdout
+				char buffer[256];
+				ssize_t count;
+				while ((count = read(pipe_out[0], buffer, sizeof(buffer) - 1)) > 0) {
+					buffer[count] = '\0';
+					output << buffer; // Append the data from child process to output stream
+				}
+				close(pipe_out[0]); // Close read end after reading
 
-            auto elapsed_time = std::chrono::steady_clock::now() - start_time;
-            if (std::chrono::duration_cast<std::chrono::seconds>(elapsed_time).count() >= time_limit_sec) {
-                std::cerr << "Time limit exceeded! Killing process." << std::endl;
-#ifdef _WIN32
-                HANDLE process = OpenProcess(PROCESS_TERMINATE, FALSE, child_pid);
-                if (process) {
-                    TerminateProcess(process, 1);
-                    CloseHandle(process);
-                }
-#else
-                kill(child_pid, SIGKILL);
-#endif
-                break;
-            }
+				waitpid(child_pid, &status, 0);
 
-            std::this_thread::sleep_for(std::chrono::milliseconds(100));
-        }
-    }
-};
+				if (WIFEXITED(status)) logger->info("Process exited with code {}", WEXITSTATUS(status));
+				else if (WIFSIGNALED(status)) logger->error("Process terminated by signal {}", WTERMSIG(status));
+			}
+			else logger->error("Failed to fork process");
+		}
+	};
+}
 
 #endif

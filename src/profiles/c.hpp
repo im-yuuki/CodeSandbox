@@ -10,10 +10,10 @@ namespace profile {
 	private:
 		const string compile_command = utils::get_env(
 			"C17_COMPILE_COMMAND",
-			"gcc -O3 -std=c17 -static -o main.out"
+			"gcc -O3 -std=c17 -static -DONLINE_JUDGE -o main.out"
 			);
 
-		void compile() {
+		void compile() override {
 			const string command = compile_command + " main.cpp";
 			if (system(command.c_str()) != 0) {
 				throw std::runtime_error("Compilation failed");
@@ -21,7 +21,7 @@ namespace profile {
 		}
 
 	public:
-		C17(Submission submission, Problem problem) : IProfile(std::move(submission), std::move(problem)) {}
+		C17(Submission submission, data::Problem problem) : IProfile(std::move(submission), std::move(problem)) {}
 	};
 
 }

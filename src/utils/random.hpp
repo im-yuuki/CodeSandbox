@@ -9,6 +9,7 @@ constexpr char CHARSET[] = "abcdefghijklmnopqrstuvwxyz0123456789";
 namespace utils {
 
 	inline std::string random_dir_name() {
+		// Generate a random 32-character string, which can be used as a temporary directory name
 		using namespace std;
 		char result[33];
 		random_device rd;

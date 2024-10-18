@@ -16,17 +16,30 @@ add_executable(main
         src/utils/random.hpp
         src/utils/compare.hpp
 
-        src/profiles/c17.hpp
+        src/profiles/c.hpp
         src/profiles/abstract.hpp
-        src/profiles/cpp17.hpp
-        src/profiles/python312.hpp
+        src/profiles/cpp.hpp
+        src/profiles/python3.hpp
         src/utils/runguard.hpp
+        src/profiles/register.hpp
 )
 
+# Install these packages with vcpkg
 find_package(Crow CONFIG REQUIRED)
 find_package(spdlog CONFIG REQUIRED)
+
 target_link_libraries(main PRIVATE Crow::Crow asio::asio spdlog::spdlog)
 
-if (MSVC)
-    target_compile_options(main PRIVATE /utf-8 -D_WIN32_WINNT=0x0601)
-endif()
+add_compile_options(
+        -DNDEBUG
+        -O3 -static
+        -Wall -Wextra -Wpedantic
+        -Wunused-variable
+        -Wunused-parameter
+        -Wunused-function
+        -Wunused-but-set-variable
+        -Wunused-private-field
+        -Wunused-local-typedefs
+        -Wunused-const-variable
+        -Wunused-value
+)
