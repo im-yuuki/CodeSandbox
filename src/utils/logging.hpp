@@ -8,10 +8,10 @@
 
 namespace logging {
 
-	static string get_log_filename() {
-		using namespace chrono;
-		const auto now = system_clock::to_time_t(system_clock::now());
-		return static_cast<string>("logs/" + now) + ".log";
+	static std::string get_log_filename() {
+	    using namespace std::chrono;
+	    const auto now = system_clock::to_time_t(system_clock::now());
+	    return "logs/" + std::to_string(now) + ".log";
 	}
 
 	// Shared sinks
@@ -21,14 +21,14 @@ namespace logging {
 	inline shared_ptr<spdlog::logger> create_logger(const std::string& name) {
 		const auto logger = std::make_shared<spdlog::logger>(spdlog::logger(name, { console_sink, file_sink }));
 		logger->set_level(spdlog::level::info);
-		logger->set_pattern("[%d-%m-%Y %H:%M:%S] %n [%^%l%$] [thread %t] %v");
+		logger->set_pattern("[%d-%m-%Y %H:%M:%S] <%t> %n [%^%l%$] %v");
 		return logger;
 	}
 
 	inline void init() {
 		// Initialize the default logger
 		using namespace spdlog;
-		set_default_logger(create_logger("default"));
+		set_default_logger(create_logger("root"));
 	}
 
 	// Default logger functions

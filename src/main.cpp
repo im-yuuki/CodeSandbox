@@ -1,44 +1,52 @@
-#define APP_VERSION "0.0.1"
+#define APP_VERSION "1.0-dev"
+#define LOGO R"(
+__  __            __   _
+\ \/ /_  ____  __/ /__(_)
+ \  / / / / / / / //_/ /
+ / / /_/ / /_/ / ,< / /
+/_/\__,_/\__,_/_/|_/_/
+      / ___/____  / __/ /__      ______ _________
+      \__ \/ __ \/ /_/ __/ | /| / / __ `/ ___/ _ \
+     ___/ / /_/ / __/ /_ | |/ |/ / /_/ / /  /  __/
+    /____/\____/_/  \__/ |__/|__/\__/_/_/   \___/
+
+)"
 
 #include <crow.h>
 #include <string>
 
+#include "api/info.hpp"
+#include "api/result.hpp"
+#include "api/submit.hpp"
 #include "data/problems.hpp"
-#include "utils/compare.hpp"
 #include "utils/env.hpp"
 #include "utils/logging.hpp"
 
 namespace api {
-    inline std::string get_all_problems() {
-        return "Hello, World!";
-    }
-
-    inline crow::response submit_problem(const crow::request& req) {
-        return {200, "Hello, World!"};
-    }
-
-    inline std::string get_result() {
-        return "Hello, World!";
-    }
 
     inline crow::App<> init() {
         using namespace crow;
-        const auto logger = new SpdlogLogger(logging::create_logger("crow"));
-        logger::setHandler(logger);
-        App<> app;
+        logger::setHandler(new SpdlogLogger(logging::create_logger("crow")));
+        SimpleApp app;
+        app.loglevel(LogLevel::Warning);
         CROW_ROUTE(app, "/version").methods(HTTPMethod::GET)([]() { return APP_VERSION; });
+        CROW_ROUTE(app, "/handlers").methods(HTTPMethod::GET)(get_all_handlers);
         CROW_ROUTE(app, "/problems").methods(HTTPMethod::GET)(get_all_problems);
-        CROW_ROUTE(app, "/submit").methods(HTTPMethod::POST)(submit_problem);
-        CROW_ROUTE(app, "/result").methods(HTTPMethod::GET)(get_result);
+        CROW_ROUTE(app, "/submit").methods(HTTPMethod::POST)(submit);
+        CROW_ROUTE(app, "/result").methods(HTTPMethod::GET)(result);
         return app;
     }
 
 }
 
 int main() {
+    cout << LOGO;
+    utils::load_env();
     logging::init();
     data::scan_problems();
     const int port = stoi(utils::get_env("PORT", "4000"));
-    auto app = api::init();
-    app.port(port).multithreaded().run();
+    const int threads = stoi(utils::get_env("THREADS", "4"));
+    logging::info(string("Starting sandbox node version: ") + APP_VERSION + " at http://0.0.0.0:" + to_string(port) + " with " + to_string(threads) + " threads");
+    api::init().port(port).multithreaded().concurrency(threads).run();
+    return 0;
 }

@@ -3,13 +3,13 @@
 
 #include <string>
 #include <fstream>
-#include <map>
+#include <unordered_map>
 #include <cstdlib>
 
 using namespace std;
 
 namespace utils {
-    static map<string, string> env_vars;
+    static unordered_map<string, string> env_vars;
 
     inline string trim(const string& str) {
         // Remove leading and trailing spaces
@@ -19,11 +19,10 @@ namespace utils {
         return str.substr(first, last - first + 1);
     }
 
-    inline void load_env(const string& env_file = ".env") {
+    inline void load_env() {
         // Parse the environment file
-        ifstream file(env_file);
+        ifstream file(".env");
         if (!file.is_open()) return;
-
         string line;
         while (getline(file, line)) {
             if (line.empty() || line[0] == '#') continue;

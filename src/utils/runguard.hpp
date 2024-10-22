@@ -22,7 +22,7 @@ namespace utils {
 			: time_limit_secs(time_limit_secs), memory_limit_mb(memory_limit_mb) {
 		}
 
-		void run(const char* command, std::string& input, std::stringstream& output) {
+		void run(const char* command, const std::string& input, std::stringstream& output) {
 			int pipe_in[2];
 			int pipe_out[2];
 

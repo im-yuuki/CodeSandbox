@@ -3,6 +3,7 @@ project(CodeSandbox)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -static -O3 -DNDEBUG")
 
 add_executable(main
         src/main.cpp
@@ -15,31 +16,21 @@ add_executable(main
         src/utils/env.hpp
         src/utils/random.hpp
         src/utils/compare.hpp
-
-        src/profiles/c.hpp
-        src/profiles/abstract.hpp
-        src/profiles/cpp.hpp
-        src/profiles/python3.hpp
         src/utils/runguard.hpp
-        src/profiles/register.hpp
+
+        src/handlers/c.hpp
+        src/handlers/abstract.hpp
+        src/handlers/cpp.hpp
+        src/handlers/python3.hpp
+        src/handlers/register.hpp
+        src/api/info.hpp
+        src/api/submit.hpp
+        src/api/result.hpp
 )
 
 # Install these packages with vcpkg
 find_package(Crow CONFIG REQUIRED)
 find_package(spdlog CONFIG REQUIRED)
+find_package(nlohmann_json CONFIG REQUIRED)
 
-target_link_libraries(main PRIVATE Crow::Crow asio::asio spdlog::spdlog)
-
-add_compile_options(
-        -DNDEBUG
-        -O3 -static
-        -Wall -Wextra -Wpedantic
-        -Wunused-variable
-        -Wunused-parameter
-        -Wunused-function
-        -Wunused-but-set-variable
-        -Wunused-private-field
-        -Wunused-local-typedefs
-        -Wunused-const-variable
-        -Wunused-value
-)
+target_link_libraries(main PRIVATE Crow::Crow asio::asio spdlog::spdlog nlohmann_json::nlohmann_json)

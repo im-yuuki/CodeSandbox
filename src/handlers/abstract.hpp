@@ -10,21 +10,22 @@
 #include "../utils/logging.hpp"
 #include "../utils/random.hpp"
 
-namespace profile {
+namespace handlers {
 
-	static auto logger = logging::create_logger("profile");
+	static auto logger = logging::create_logger("handlers");
 
-	class IProfile {
+	class IHandler {
 	private:
-		Submission submission;
+		data::Submission submission;
 		data::Problem problem;
 		std::string work_dir;
+		std::string variant = "default";
 
 		virtual void compile() = 0;
 		virtual void test(string input, string output) = 0;
 
 	public:
-		IProfile(Submission submission, data::Problem problem) : submission(std::move(submission)), problem(std::move(problem)) {
+		IHandler(data::Submission submission, data::Problem problem) : submission(std::move(submission)), problem(std::move(problem)) {
 			// Create a temporary directory for the submission
 			this->work_dir = "run/" + utils::random_dir_name();
 			try {
@@ -36,28 +37,36 @@ namespace profile {
 			}
 		};
 
-		Submission& get_submission() {
+		data::Submission& get_submission() {
 			// idk why i made this function =))
 			return this->submission;
+		};
+
+		virtual vector<string> get_variants() = 0;
+
+		void set_variant(const string& variant) {
+			this->variant = variant;
 		};
 
 		void run() {
 			if (submission.status != data::submission_status::Queued) return;
 			submission.status = data::submission_status::Running;
 			compile();
+			int tc_count = 0;
+			// Run test cases
 			if (submission.status != data::submission_status::Running) goto end_run;
-			for (int i = 0; i < problem.test_case_count; i++) {
-				test(problem.test_cases[i].input, problem.test_cases[i].output);
-				if (submission.status == data::submission_status::WrongAnswer) submission.message = "Wrong answer on test case " + std::to_string(i + 1);
+			for (const auto& test_case : problem.test_cases) {
+				test(test_case.input, test_case.output);
+				if (submission.status == data::submission_status::WrongAnswer) submission.message = "Wrong answer on test case " + std::to_string(++tc_count);
 				if (submission.status != data::submission_status::Running) goto end_run;
 			}
 			submission.status = data::submission_status::Accepted;
 			submission.message = "All test cases passed";
 			end_run:
-			logger->info("Submission " + submission.submission_id + " finished with status " + std::to_string(submission.status));
+			logger->info("Submission " + submission.submission_id + " finished: " + std::to_string(submission.status));
 		}
 
-		virtual ~IProfile() {
+		virtual ~IHandler() {
 			try {
 				std::filesystem::remove_all(this->work_dir);
 			} catch (const std::exception& e) {
