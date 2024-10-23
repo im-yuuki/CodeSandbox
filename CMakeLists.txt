@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.29)
+cmake_minimum_required(VERSION 3.28)
 project(CodeSandbox)
 
 set(CMAKE_CXX_STANDARD 20)
@@ -21,8 +21,8 @@ add_executable(main
         src/handlers/c.hpp
         src/handlers/abstract.hpp
         src/handlers/cpp.hpp
-        src/handlers/python3.hpp
         src/handlers/register.hpp
+
         src/api/info.hpp
         src/api/submit.hpp
         src/api/result.hpp
