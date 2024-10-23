@@ -31,12 +31,12 @@ namespace data {
 
 	struct Problem {
 		string id;
-		int time_limit_ms, memory_limit_mb;
+		int time_limit_secs, memory_limit_mb;
 		vector<TestCase> test_cases;
 
-		Problem(string id, const int time_limit_ms, const int memory_limit_mb) {
+		Problem(string id, const int time_limit_secs, const int memory_limit_mb) {
 			this->id = std::move(id);
-			this->time_limit_ms = time_limit_ms;
+			this->time_limit_secs = time_limit_secs;
 			this->memory_limit_mb = memory_limit_mb;
 		}
 	};
@@ -45,7 +45,7 @@ namespace data {
 
 	inline Problem load_problem(const string& id) {
 		std::ifstream file("problems/" + id + "/config.cfg");
-		int time_limit_ms = 0, memory_limit_mb = 0, test_cases_count = 0;
+		int time_limit_secs = 0, memory_limit_mb = 0, test_cases_count = 0;
 		string line;
 		while (getline(file, line)) {
 			if (line.empty() || line[0] == '#') continue;
@@ -54,7 +54,7 @@ namespace data {
 				string key = utils::trim(line.substr(0, delimiter_pos));
 				string value = utils::trim(line.substr(delimiter_pos + 1));
 				if (key == "TIME_LIMIT") {
-					time_limit_ms = stoi(value);
+					time_limit_secs = stoi(value);
 				} else if (key == "MEMORY_LIMIT") {
 					memory_limit_mb = stoi(value);
 				} else if (key == "TEST_CASES") {
@@ -64,7 +64,7 @@ namespace data {
 		}
 		file.close();
 		if (test_cases_count == 0) throw std::runtime_error("Invalid problem configuration");
-		Problem problem(id, time_limit_ms, memory_limit_mb);
+		Problem problem(id, time_limit_secs, memory_limit_mb);
 		// Load test cases
 		for (int i = 1; i <= test_cases_count; i++) problem.test_cases.emplace_back(id, i);
 		return problem;
@@ -83,6 +83,7 @@ namespace data {
 				const string id = entry.path().filename().string();
 				problem_list.push_back(load_problem(id));
 				logger->info("Loaded problem ID: {}", id);
+				problems_count++;
 			} catch (const std::exception& e) {
 				logger->error("Failed to load problem {}: {}", entry.path().filename().string(), e.what());
 			}

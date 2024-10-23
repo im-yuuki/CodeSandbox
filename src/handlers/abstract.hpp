@@ -17,15 +17,13 @@ namespace handlers {
 	class IHandler {
 	private:
 		virtual void compile() = 0;
-		virtual void test(string input, string output) = 0;
+		virtual void test(const string& input, const string& output) = 0;
 
 	public:
 		data::Submission submission;
 		data::Problem problem;
 		std::string work_dir;
 		std::string variant = "default";
-
-		virtual vector<string> get_variants() = 0;
 
 		IHandler(data::Submission submission, data::Problem problem) : submission(std::move(submission)), problem(std::move(problem)) {
 			// Create a temporary directory for the submission

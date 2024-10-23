@@ -11,7 +11,7 @@ namespace data {
 	struct Submission {
 		string submission_id;
 		string problem_id;
-		byte* file = nullptr;
+		byte* content = nullptr;
 		string profile;
 		data::submission_status::Enum status = data::submission_status::Pending;
 		string message;

@@ -15,9 +15,10 @@ namespace utils {
 	class RunGuard {
 		unsigned time_limit_secs;
 		unsigned memory_limit_mb;
-		int status = EXIT_SUCCESS;
 
 	public:
+		int status = EXIT_FAILURE;
+
 		RunGuard(const unsigned time_limit_secs, const unsigned memory_limit_mb)
 			: time_limit_secs(time_limit_secs), memory_limit_mb(memory_limit_mb) {
 		}

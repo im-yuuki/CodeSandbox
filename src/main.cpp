@@ -43,6 +43,7 @@ int main() {
     cout << LOGO;
     utils::load_env();
     logging::init();
+    handlers::init();
     data::scan_problems();
     const int port = stoi(utils::get_env("PORT", "4000"));
     const int threads = stoi(utils::get_env("THREADS", "4"));
