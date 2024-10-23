@@ -43,6 +43,13 @@ namespace data {
 
 	static vector<Problem> problem_list;
 
+	inline Problem get_problem(const string& id) {
+		for (const auto& problem : problem_list) {
+			if (problem.id == id) return problem;
+		}
+		throw std::runtime_error("Problem ID is not available in this node");
+	}
+
 	inline Problem load_problem(const string& id) {
 		std::ifstream file("problems/" + id + "/config.cfg");
 		int time_limit_secs = 0, memory_limit_mb = 0, test_cases_count = 0;

@@ -12,18 +12,18 @@ namespace data {
 		string submission_id;
 		string problem_id;
 		byte* content = nullptr;
-		string profile;
-		data::submission_status::Enum status = data::submission_status::Pending;
+		string target_handler;
+		submission_status::Enum status = submission_status::Pending;
 		string message;
 
 		Submission(
 			const string& submission_id,
 			const string& problem_id,
-			const string& profile
+			const string& handler
 			) {
 			this->submission_id = submission_id;
 			this->problem_id = problem_id;
-			this->profile = profile;
+			this->target_handler = handler;
 		}
 	};
 

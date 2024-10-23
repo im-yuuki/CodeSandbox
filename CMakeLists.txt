@@ -26,6 +26,8 @@ add_executable(main
         src/api/info.hpp
         src/api/submit.hpp
         src/api/result.hpp
+        src/utils/queue.hpp
+        src/data/results.hpp
 )
 
 # Install these packages with vcpkg
