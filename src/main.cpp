@@ -19,6 +19,7 @@ __  __            __
 #include "api/result.hpp"
 #include "api/submit.hpp"
 #include "data/problems.hpp"
+#include "data/storage.hpp"
 #include "utils/env.hpp"
 #include "utils/logging.hpp"
 
@@ -30,7 +31,7 @@ namespace api {
         SimpleApp app;
         app.loglevel(LogLevel::Warning);
         CROW_ROUTE(app, "/version").methods(HTTPMethod::GET)([]() { return APP_VERSION; });
-        CROW_ROUTE(app, "/handlers").methods(HTTPMethod::GET)(get_all_handlers);
+        CROW_ROUTE(app, "/modules").methods(HTTPMethod::GET)(get_all_modules);
         CROW_ROUTE(app, "/problems").methods(HTTPMethod::GET)(get_all_problems);
         CROW_ROUTE(app, "/submit").methods(HTTPMethod::POST)(submit);
         CROW_ROUTE(app, "/result").methods(HTTPMethod::GET)(result);
@@ -40,14 +41,18 @@ namespace api {
 }
 
 int main() {
-    cout << LOGO;
+    std::cout << LOGO;
     utils::load_env();
     logging::init();
     handlers::init();
     data::scan_problems();
     const int port = stoi(utils::get_env("PORT", "4000"));
     const int threads = stoi(utils::get_env("THREADS", "4"));
-    logging::info(string("Starting sandbox node version: ") + APP_VERSION + " at http://0.0.0.0:" + to_string(port) + " with " + to_string(threads) + " threads");
+    logging::info(
+        std::string("Starting sandbox node version: ") + APP_VERSION
+        + " at http://0.0.0.0:" + std::to_string(port)
+        + " with " + std::to_string(threads) + " threads"
+        );
     api::init().port(port).multithreaded().concurrency(threads).run();
     return 0;
 }

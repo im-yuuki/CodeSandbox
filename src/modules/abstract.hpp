@@ -14,10 +14,10 @@ namespace handlers {
 
 	static auto logger = logging::create_logger("handlers");
 
-	class IHandler {
+	class IModules {
 	private:
 		virtual void compile() = 0;
-		virtual void test(const string& input, const string& output) = 0;
+		virtual void test(const std::string& input, const std::string& output) = 0;
 
 	public:
 		data::Submission submission;
@@ -25,13 +25,13 @@ namespace handlers {
 		std::string work_dir;
 		std::string variant = "default";
 
-		IHandler(data::Submission submission, data::Problem problem) : submission(std::move(submission)), problem(std::move(problem)) {
+		IModules(data::Submission submission, data::Problem problem) : submission(std::move(submission)), problem(std::move(problem)) {
 			// Create a temporary directory for the submission
 			this->work_dir = "run/" + utils::random_dir_name();
 			try {
 				std::filesystem::create_directory(this->work_dir);
 			} catch (const std::exception& e) {
-				logger->info("Error while creating run space for submission " + submission.submission_id + ": " + e.what());
+				logger->info("Error while creating run space for submission " + submission.id + ": " + e.what());
 				submission.status = data::submission_status::InternalError;
 				submission.message = e.what();
 			}
@@ -52,14 +52,14 @@ namespace handlers {
 			submission.status = data::submission_status::Accepted;
 			submission.message = "All test cases passed";
 			end_run:
-			logger->info("Submission " + submission.submission_id + " finished: " + std::to_string(submission.status));
+			logger->info("Submission " + submission.id + " finished: " + std::to_string(submission.status));
 		}
 
-		virtual ~IHandler() {
+		virtual ~IModules() {
 			try {
 				std::filesystem::remove_all(this->work_dir);
 			} catch (const std::exception& e) {
-				logger->info("Error while cleaning run space for submission " + submission.submission_id + ": " + e.what());
+				logger->info("Error while cleaning run space for submission " + submission.id + ": " + e.what());
 			}
 		}
 	};

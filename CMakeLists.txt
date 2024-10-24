@@ -16,18 +16,20 @@ add_executable(main
         src/utils/env.hpp
         src/utils/random.hpp
         src/utils/compare.hpp
+        src/utils/queue.hpp
         src/utils/runguard.hpp
 
-        src/handlers/c.hpp
-        src/handlers/abstract.hpp
-        src/handlers/cpp.hpp
-        src/handlers/register.hpp
+        src/modules/c.hpp
+        src/modules/abstract.hpp
+        src/modules/cpp.hpp
+        src/modules/register.hpp
 
         src/api/info.hpp
         src/api/submit.hpp
         src/api/result.hpp
-        src/utils/queue.hpp
+
         src/data/results.hpp
+        src/data/storage.hpp
 )
 
 # Install these packages with vcpkg

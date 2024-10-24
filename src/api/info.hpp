@@ -5,13 +5,14 @@
 #include <nlohmann/json.hpp>
 
 #include "../data/problems.hpp"
-#include "../handlers/register.hpp"
+#include "../data/storage.hpp"
+#include "../modules/register.hpp"
 
 namespace api {
 
-	inline crow::response get_all_handlers() {
+	inline crow::response get_all_modules() {
 		vector<string> handlers;
-		for (const auto& key : handlers::handlers | views::keys) {
+		for (const auto& key : handlers::modules | views::keys) {
 			handlers.push_back(key);
 		}
 		const nlohmann::json j = handlers;

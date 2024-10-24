@@ -18,7 +18,7 @@ namespace logging {
 	const static auto console_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
 	const static auto file_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(get_log_filename(), true);
 
-	inline shared_ptr<spdlog::logger> create_logger(const std::string& name) {
+	inline std::shared_ptr<spdlog::logger> create_logger(const std::string& name) {
 		const auto logger = std::make_shared<spdlog::logger>(spdlog::logger(name, { console_sink, file_sink }));
 		logger->set_level(spdlog::level::info);
 		logger->set_pattern("[%d-%m-%Y %H:%M:%S] <%t> %n [%^%l%$] %v");

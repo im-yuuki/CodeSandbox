@@ -12,12 +12,13 @@
 #include "logging.hpp"
 #include "../data/problems.hpp"
 #include "../data/submissions.hpp"
-#include "../handlers/abstract.hpp"
-#include "../handlers/register.hpp"
+#include "../data/storage.hpp"
+#include "../modules/abstract.hpp"
+#include "../modules/register.hpp"
 
 namespace queue {
 
-    static spdlog::logger* logger = logging::create_logger("queue");
+    static auto logger = logging::create_logger("queue");
 
     template <typename T>
     class ThreadSafeQueue {
@@ -85,16 +86,17 @@ namespace queue {
     };
 
     inline void processSubmission(data::Submission& submission) {
-        logger->info("Start processing for submission: {}", submission.submission_id);
+        logger->info("Start processing for submission: {}", submission.id);
         try {
             const data::Problem problem = data::get_problem(submission.problem_id);
-            handlers::IHandler* handler = handlers::create_handler(submission, problem);
+            handlers::IModules* handler = handlers::create_handler(submission, problem);
             handler->run();
         } catch (const std::exception& e) {
             submission.status = data::submission_status::InternalError;
             submission.message = e.what();
         }
-
+        data::result_list.emplace_back(submission.id, submission.status, submission.message);
+        delete submission.file_content;
     }
 
     static ThreadSafeQueue<data::Submission> submission_queue(processSubmission);

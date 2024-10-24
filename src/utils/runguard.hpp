@@ -4,7 +4,6 @@
 #include <cstdlib>
 #include <unistd.h>
 #include <sys/resource.h>
-#include <sys/time.h>
 #include <sys/wait.h>
 #include <sstream>
 #include "logging.hpp"
@@ -18,6 +17,7 @@ namespace utils {
 
 	public:
 		int status = EXIT_FAILURE;
+		std::string message;
 
 		RunGuard(const unsigned time_limit_secs, const unsigned memory_limit_mb)
 			: time_limit_secs(time_limit_secs), memory_limit_mb(memory_limit_mb) {
@@ -89,10 +89,11 @@ namespace utils {
 
 				waitpid(child_pid, &status, 0);
 
-				if (WIFEXITED(status)) logger->info("Process exited with code {}", WEXITSTATUS(status));
-				else if (WIFSIGNALED(status)) logger->error("Process terminated by signal {}", WTERMSIG(status));
+				if (WIFEXITED(status)) message = "Process exited with code " + std::to_string(WEXITSTATUS(status));
+				else if (WIFSIGNALED(status)) message = "Process terminated by signal " + std::to_string(WTERMSIG(status));
 			}
-			else logger->error("Failed to fork process");
+			else message = "Failed to fork process";
+			if (status != EXIT_SUCCESS) logger->error(message);
 		}
 	};
 }
