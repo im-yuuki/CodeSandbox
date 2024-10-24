@@ -1,4 +1,4 @@
-#define APP_VERSION "1.0-dev"
+#define APP_VERSION "1.1-beta"
 #define LOGO R"(
 __  __            __
 \ \/ /_  ____  __/ /__(_)
@@ -46,6 +46,6 @@ int main() {
     data::scan_problems();
     const int port = stoi(utils::get_env("PORT", "4000"));
     logging::info(std::string("Starting sandbox node version: ") + APP_VERSION + " at http://0.0.0.0:" + std::to_string(port));
-    api::init().port(port).run();
+    api::init().port(port).multithreaded().run();
     return 0;
 }

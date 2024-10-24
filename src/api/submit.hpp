@@ -9,10 +9,9 @@
 namespace api {
 
 	static std::mutex submit_mutex;
+	static auto logger = logging::create_logger("api");
 
 	inline crow::response submit(const crow::request& req) {
-		std::lock_guard lock(submit_mutex); // Lock the mutex
-
 		std::string id;
 		std::string problem_id;
 		std::string file_content;
@@ -31,16 +30,26 @@ namespace api {
 		}
 
 		data::Submission submission(id, problem_id, file_content, target_module);
+		logger->info(
+			"New submission ID {} from {}, using module {}",
+			submission.id, req.remote_ip_address, target_module
+			);
 
-		try {
-			const data::Problem* problem = data::get_problem(submission.problem_id);
-			modules::IModules* handler = modules::create_handler(&submission, problem);
-			handler->run();
-			submission = handler->submission;
-			handler->cleanup();
-		} catch (const std::exception& e) {
-			submission.status = data::submission_status::InternalError;
-			submission.message = e.what();
+		{
+			std::lock_guard lock(submit_mutex);
+			modules::IModules* handler = nullptr;
+
+			try {
+				const data::Problem* problem = data::get_problem(submission.problem_id);
+				handler = modules::create_handler(&submission, problem);
+				handler->run();
+				submission = handler->submission;
+			} catch (const std::exception& e) {
+				submission.status = data::submission_status::InternalError;
+				submission.message = e.what();
+			}
+
+			if (handler != nullptr) handler->cleanup();
 		}
 
 		nlohmann::json j = {

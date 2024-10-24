@@ -59,10 +59,10 @@ namespace data {
 				problem_list.push_back(load_problem(id));
 				problems_count++;
 			} catch (const std::exception& e) {
-				logger->error("Failed to load problem {}: {}", entry.path().filename().string(), e.what());
+				logger->warn("Problem {} can't be loaded: {}", entry.path().filename().string(), e.what());
 			}
 		}
-		logger->info("Indexed {} problems", problem_list.size());
+		logger->info("Loaded {} problems", problem_list.size());
 	}
 
 }

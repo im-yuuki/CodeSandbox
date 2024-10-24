@@ -3,9 +3,9 @@ project(CodeSandbox)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -static -O3 -DNDEBUG")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -static -O3 -march=native -DNDEBUG")
 
-add_executable(main
+add_executable(CodeSandbox
         src/main.cpp
 
         src/data/submissions.hpp
@@ -34,4 +34,4 @@ find_package(Crow CONFIG REQUIRED)
 find_package(spdlog CONFIG REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
 
-target_link_libraries(main PRIVATE Crow::Crow asio::asio spdlog::spdlog nlohmann_json::nlohmann_json)
+target_link_libraries(CodeSandbox PRIVATE Crow::Crow asio::asio spdlog::spdlog nlohmann_json::nlohmann_json)

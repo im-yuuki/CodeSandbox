@@ -48,8 +48,8 @@ namespace utils {
 				// Set resource limits
 				if (memory_limit_mb) {
 					rlimit mem_limit{};
-					mem_limit.rlim_cur = memory_limit_mb * 1024 * 1024;
-					mem_limit.rlim_max = memory_limit_mb * 1024 * 1024;
+					mem_limit.rlim_cur = memory_limit_mb * 1048576;
+					mem_limit.rlim_max = memory_limit_mb * 1048576;
 					if (setrlimit(RLIMIT_AS, &mem_limit) != 0) exit(EXIT_FAILURE);
 				}
 				if (time_limit_secs) {
@@ -57,6 +57,7 @@ namespace utils {
 					cpu_limit.rlim_cur = time_limit_secs;
 					cpu_limit.rlim_max = time_limit_secs;
 					if (setrlimit(RLIMIT_CPU, &cpu_limit) != 0) exit(EXIT_FAILURE);
+					alarm(time_limit_secs);
 				}
 
 				execvp(command, args);

@@ -7,7 +7,7 @@ namespace modules {
     class Cpp final : public IModules {
     private:
         const std::string compile_command = utils::get_env("CPP_COMPILE_COMMAND", "g++");
-        const std::string default_args = "-O3 -static -DONLINE_JUDGE -lm";
+        const std::string default_args = "-O3 -static -march=native -DNDEBUG -DONLINE_JUDGE -lm";
 
         void compile() override {
             if (submission.status != data::submission_status::Running) return;
@@ -41,7 +41,7 @@ namespace modules {
                 }
             }
             else if (WIFSIGNALED(run_guard.status)) {
-                if (WTERMSIG(run_guard.status) == SIGXCPU)
+                if (WTERMSIG(run_guard.status) == SIGXCPU || WTERMSIG(run_guard.status) == SIGALRM)
                     submission.status = data::submission_status::TimeLimitExceeded;
                 else if (WTERMSIG(run_guard.status) == SIGKILL)
                     submission.status = data::submission_status::MemoryLimitExceeded;

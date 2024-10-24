@@ -44,7 +44,6 @@ namespace modules {
 		void run() {
 			if (submission.status != data::submission_status::Queued) return;
 			submission.status = data::submission_status::Running;
-			logger->info("Start processing for submission {}, using module {}", submission.id, variant);
 			compile();
 			int tc_count = 0;
 			// Run test cases
