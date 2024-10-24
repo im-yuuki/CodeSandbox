@@ -20,7 +20,7 @@ jobs:
       - name: Install dependencies with vcpkg
         run: |
           cd vcpkg
-          ./vcpkg install crow spdlog nlohmann_json
+          ./vcpkg install crow spdlog nlohmann-json
 
       - name: Configure CMake
         run: |
