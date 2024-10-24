@@ -9,25 +9,29 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
+
+      - name: Install CMake and g++
+        run: |
+          sudo apt update
+          sudo apt install -y cmake g++
 
       - name: Set up vcpkg
         run: |
           git clone https://github.com/microsoft/vcpkg.git
           cd vcpkg
           ./bootstrap-vcpkg.sh
-          echo "::add-path::$(pwd)"
 
       - name: Install dependencies with vcpkg
         run: |
-          cd path/to/your/project
-          ./vcpkg install crow spdlog nlohmann_json
+          cd vcpkg
+          ./vcpkg install crow spdlog nlohmann-json
 
       - name: Configure CMake
         run: |
           mkdir build
           cd build
-          cmake .. -DCMAKE_TOOLCHAIN_FILE=$(pwd)/../vcpkg/scripts/buildsystems/vcpkg.cmake
+          cmake .. -DCMAKE_TOOLCHAIN_FILE=$(pwd)/../vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++
 
       - name: Build the project
         run: |
