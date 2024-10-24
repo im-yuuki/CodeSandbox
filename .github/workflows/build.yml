@@ -12,22 +12,18 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up vcpkg
-        env:
-          ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
         run: |
           git clone https://github.com/microsoft/vcpkg.git
           cd vcpkg
           ./bootstrap-vcpkg.sh
-          echo "::add-path::$(pwd)"
 
       - name: Install dependencies with vcpkg
         run: |
-          cd ..
+          cd vcpkg
           ./vcpkg install crow spdlog nlohmann_json
 
       - name: Configure CMake
         run: |
-          mkdir build
           cd build
           cmake .. -DCMAKE_TOOLCHAIN_FILE=$(pwd)/../vcpkg/scripts/buildsystems/vcpkg.cmake
 
