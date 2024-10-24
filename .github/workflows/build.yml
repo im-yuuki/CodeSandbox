@@ -1,0 +1,41 @@
+name: Build CMake Project
+
+on:
+  workflow_dispatch: # Manual trigger
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up vcpkg
+        run: |
+          git clone https://github.com/microsoft/vcpkg.git
+          cd vcpkg
+          ./bootstrap-vcpkg.sh
+          echo "::add-path::$(pwd)"
+
+      - name: Install dependencies with vcpkg
+        run: |
+          cd path/to/your/project
+          ./vcpkg install crow spdlog nlohmann_json
+
+      - name: Configure CMake
+        run: |
+          mkdir build
+          cd build
+          cmake .. -DCMAKE_TOOLCHAIN_FILE=$(pwd)/../vcpkg/scripts/buildsystems/vcpkg.cmake
+
+      - name: Build the project
+        run: |
+          cd build
+          cmake --build . --config Release
+
+      - name: Upload executable as artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: code_sandbox_linux_x86_64
+          path: build/main

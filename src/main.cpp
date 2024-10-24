@@ -45,12 +45,7 @@ int main() {
     modules::init();
     data::scan_problems();
     const int port = stoi(utils::get_env("PORT", "4000"));
-    const int threads = stoi(utils::get_env("THREADS", "4"));
-    logging::info(
-        std::string("Starting sandbox node version: ") + APP_VERSION
-        + " at http://0.0.0.0:" + std::to_string(port)
-        + " with " + std::to_string(threads) + " threads"
-        );
-    api::init().port(port).multithreaded().concurrency(threads).run();
+    logging::info(std::string("Starting sandbox node version: ") + APP_VERSION + " at http://0.0.0.0:" + std::to_string(port));
+    api::init().port(port).run();
     return 0;
 }

@@ -33,7 +33,7 @@ namespace modules {
 			this->work_dir = "run/" + utils::random_dir_name();
 			try {
 				std::filesystem::create_directory("run");
-				std::filesystem::create_directory(this->work_dir);
+				std::filesystem::create_directory(work_dir);
 			} catch (const std::exception& e) {
 				logger->error("Error while creating run space for submission {}: {}", submission->id, e.what());
 				this->submission.status = data::submission_status::InternalError;
@@ -50,16 +50,25 @@ namespace modules {
 			// Run test cases
 			if (submission.status != data::submission_status::Running) goto end_run;
 			for (const auto& test_case : problem.test_cases) {
+				tc_count++;
 				test(test_case.input, test_case.output);
-				if (submission.status == data::submission_status::WrongAnswer) submission.message = "WA on test case " + std::to_string(++tc_count);
-				else if (submission.status == data::submission_status::TimeLimitExceeded) submission.message = "TLE on test case " + std::to_string(++tc_count);
-				else if (submission.status == data::submission_status::MemoryLimitExceeded) submission.message = "MLE on test case " + std::to_string(++tc_count);
+				if (submission.status == data::submission_status::WrongAnswer) submission.message = "WA on test case " + std::to_string(tc_count);
+				else if (submission.status == data::submission_status::TimeLimitExceeded) submission.message = "TLE on test case " + std::to_string(tc_count);
+				else if (submission.status == data::submission_status::MemoryLimitExceeded) submission.message = "MLE on test case " + std::to_string(tc_count);
 				if (submission.status != data::submission_status::Running) goto end_run;
 			}
 			submission.status = data::submission_status::Accepted;
 			submission.message = "All test cases passed";
 			end_run:
 			logger->info("Submission {}: {} ({})", submission.id, repr(submission.status), submission.message);
+		}
+
+		void cleanup() {
+			try {
+				std::filesystem::remove_all(work_dir);
+			} catch (const std::exception& e) {
+				logger->info("Error while cleaning run space for submission {}: {}", submission.id, e.what());
+			}
 		}
 	};
 

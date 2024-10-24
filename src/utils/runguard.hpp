@@ -43,9 +43,6 @@ namespace utils {
 				dup2(pipe_in[0], STDIN_FILENO);
 				dup2(pipe_out[1], STDOUT_FILENO);
 
-				// Reset signal handler for SIGXCPU
-				// signal(SIGXCPU, SIG_DFL);
-
 				char* args[] = {const_cast<char*>(command), nullptr};
 
 				// Set resource limits

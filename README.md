@@ -13,7 +13,6 @@ Môi trường chấm mã nguồn tự động dùng cho các cuộc thi lập t
 ## Cấu hình máy chủ HTTP
 Sử dụng các biến môi trường sau:
 - `PORT` (mặc định: `4000`): Chỉ định cổng HTTP để máy chủ sử dụng.
-- `THREADS` (mặc định: `4`): Giới hạn số luồng xử luồng xử lí yêu cầu HTTP.
 
 ## API
 - `GET /version`: Trả về phiên bản của chương trình, có thể sử dụng để kiểm tra kết nối từ client.
@@ -22,7 +21,7 @@ Sử dụng các biến môi trường sau:
 - `GET /problems`: Trả về danh sách các bài chấm đã được nhập vào chương trình.
 > Phản hồi: `application/json`
 
-- `GET /handlers`: Trả về danh sách các module có thể lựa chọn để chấm ở chương trình.
+- `GET /modules`: Trả về danh sách các module có thể lựa chọn để chấm ở chương trình.
 > Phản hồi: `application/json`
 
 - `POST /submit`:  Tạo yêu cầu chấm
@@ -32,15 +31,9 @@ Sử dụng các biến môi trường sau:
 > - `target_module` (string): Module chấm sử dụng cho yêu cầu
 > - `file` (file): Tệp mã nguồn
 
-> Phản hồi: `text/plain`
-
-- `GET /result`: Lấy kết quả của yêu cầu chấm đã nộp
-> Yêu cầu: `application/x-www-form-urlencoded`
-> - `id`(string): ID yêu cầu chấm đã nộp trước đó
-
 > Phản hồi: `application/json`
 > - `id`(string): ID yêu cầu chấm
-> - `status` (enum): Pending, Queued, Running, Accepted, WrongAnswer, TimeLimitExceeded, MemoryLimitExceeded, RuntimeError, CompilationError, InternalError
+> - `status` (enum): Accepted, WrongAnswer, TimeLimitExceeded, MemoryLimitExceeded, RuntimeError, CompilationError, InternalError
 > - `message` (string): Phản hồi từ trình chấm
 
 ## Cấu hình bài chấm

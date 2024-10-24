@@ -26,7 +26,7 @@ namespace api {
 			else if (part_name == "file") file_content = body;
 			else if (part_name == "target_module") target_module = body;
 		}
-		if (id.empty() || problem_id.empty() || file_content.empty() || target_module.empty()) {
+		if (id.empty() || problem_id.empty() || target_module.empty()) {
 			return {400, "Missing required fields"};
 		}
 
@@ -37,6 +37,7 @@ namespace api {
 			modules::IModules* handler = modules::create_handler(&submission, problem);
 			handler->run();
 			submission = handler->submission;
+			handler->cleanup();
 		} catch (const std::exception& e) {
 			submission.status = data::submission_status::InternalError;
 			submission.message = e.what();

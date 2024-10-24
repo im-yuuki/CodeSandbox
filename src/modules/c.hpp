@@ -37,11 +37,19 @@ namespace modules {
 			utils::RunGuard run_guard(problem.time_limit_secs, problem.memory_limit_mb);
 			std::stringstream output_stream;
 			run_guard.run((work_dir + "/main.out").c_str(), input, output_stream);
-			if (run_guard.status == EXIT_SUCCESS) {
-				if (!utils::token_compare(output_stream, output)) submission.status = data::submission_status::WrongAnswer;
+			if (WIFEXITED(run_guard.status)) {
+				if (WEXITSTATUS(run_guard.status) == EXIT_SUCCESS) {
+					if (!utils::token_compare(output_stream, output))
+						submission.status = data::submission_status::WrongAnswer;
+					else return;
+				}
 			}
-			else if (run_guard.status == SIGXCPU) submission.status = data::submission_status::TimeLimitExceeded;
-			else if (run_guard.status == SIGKILL) submission.status = data::submission_status::MemoryLimitExceeded;
+			else if (WIFSIGNALED(run_guard.status)) {
+				if (WTERMSIG(run_guard.status) == SIGXCPU)
+					submission.status = data::submission_status::TimeLimitExceeded;
+				else if (WTERMSIG(run_guard.status) == SIGKILL)
+					submission.status = data::submission_status::MemoryLimitExceeded;
+			}
 			else {
 				submission.status = data::submission_status::RuntimeError;
 				submission.message = run_guard.message;
