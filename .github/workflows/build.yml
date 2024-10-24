@@ -9,9 +9,11 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Set up vcpkg
+        env:
+          ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
         run: |
           git clone https://github.com/microsoft/vcpkg.git
           cd vcpkg
@@ -20,7 +22,7 @@ jobs:
 
       - name: Install dependencies with vcpkg
         run: |
-          cd path/to/your/project
+          cd ..
           ./vcpkg install crow spdlog nlohmann_json
 
       - name: Configure CMake
