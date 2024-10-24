@@ -10,11 +10,14 @@
 #include "../utils/logging.hpp"
 #include "../utils/random.hpp"
 
-namespace handlers {
+namespace modules {
 
 	static auto logger = logging::create_logger("modules");
 
 	class IModules {
+	protected:
+		~IModules() = default;
+
 	private:
 		virtual void compile() = 0;
 		virtual void test(const std::string& input, const std::string& output) = 0;
@@ -25,43 +28,38 @@ namespace handlers {
 		std::string work_dir;
 		std::string variant = "default";
 
-		IModules(data::Submission submission, data::Problem problem) : submission(submission), problem(std::move(problem)) {
+		IModules(const data::Submission* submission, const data::Problem* problem) : submission(*submission), problem(*problem) {
 			// Create a temporary directory for the submission
 			this->work_dir = "run/" + utils::random_dir_name();
 			try {
 				std::filesystem::create_directory("run");
 				std::filesystem::create_directory(this->work_dir);
 			} catch (const std::exception& e) {
-				logger->error("Error while creating run space for submission {}: {}", submission.id, e.what());
-				submission.status = data::submission_status::InternalError;
-				submission.message = e.what();
+				logger->error("Error while creating run space for submission {}: {}", submission->id, e.what());
+				this->submission.status = data::submission_status::InternalError;
+				this->submission.message = e.what();
 			}
 		};
 
 		void run() {
 			if (submission.status != data::submission_status::Queued) return;
 			submission.status = data::submission_status::Running;
+			logger->info("Start processing for submission {}, using module {}", submission.id, variant);
 			compile();
 			int tc_count = 0;
 			// Run test cases
 			if (submission.status != data::submission_status::Running) goto end_run;
 			for (const auto& test_case : problem.test_cases) {
 				test(test_case.input, test_case.output);
-				if (submission.status == data::submission_status::WrongAnswer) submission.message = "Wrong answer on test case " + std::to_string(++tc_count);
+				if (submission.status == data::submission_status::WrongAnswer) submission.message = "WA on test case " + std::to_string(++tc_count);
+				else if (submission.status == data::submission_status::TimeLimitExceeded) submission.message = "TLE on test case " + std::to_string(++tc_count);
+				else if (submission.status == data::submission_status::MemoryLimitExceeded) submission.message = "MLE on test case " + std::to_string(++tc_count);
 				if (submission.status != data::submission_status::Running) goto end_run;
 			}
 			submission.status = data::submission_status::Accepted;
 			submission.message = "All test cases passed";
 			end_run:
-			logger->info("Submission {} finished running with status: {}", submission.id, repr(submission.status));
-		}
-
-		virtual ~IModules() {
-			try {
-				std::filesystem::remove_all(this->work_dir);
-			} catch (const std::exception& e) {
-				logger->error("Error while cleaning run space for submission {}: {}", this->submission.id, + e.what());
-			}
+			logger->info("Submission {}: {} ({})", submission.id, repr(submission.status), submission.message);
 		}
 	};
 

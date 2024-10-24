@@ -4,11 +4,15 @@
 #include <crow/http_response.h>
 #include <crow/multipart.h>
 
-#include "../utils/queue.hpp"
+#include "../data/storage.hpp"
 
 namespace api {
 
+	static std::mutex submit_mutex;
+
 	inline crow::response submit(const crow::request& req) {
+		std::lock_guard lock(submit_mutex); // Lock the mutex
+
 		std::string id;
 		std::string problem_id;
 		std::string file_content;
@@ -25,9 +29,28 @@ namespace api {
 		if (id.empty() || problem_id.empty() || file_content.empty() || target_module.empty()) {
 			return {400, "Missing required fields"};
 		}
-		::queue::submission_queue.enqueue(data::Submission(id, problem_id, file_content, target_module));
-		return {200, "Submission received"};
 
+		data::Submission submission(id, problem_id, file_content, target_module);
+
+		try {
+			const data::Problem* problem = data::get_problem(submission.problem_id);
+			modules::IModules* handler = modules::create_handler(&submission, problem);
+			handler->run();
+			submission = handler->submission;
+		} catch (const std::exception& e) {
+			submission.status = data::submission_status::InternalError;
+			submission.message = e.what();
+		}
+
+		nlohmann::json j = {
+			{"id", submission.id},
+			{"status", repr(submission.status)},
+			{"message", submission.message}
+		};
+
+		crow::response resp = {200, j.dump()};
+		resp.add_header("Content-Type", "application/json");
+		return resp;
 	}
 
 }

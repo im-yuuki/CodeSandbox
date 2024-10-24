@@ -4,25 +4,16 @@
 #include <vector>
 
 #include "problems.hpp"
-#include "results.hpp"
 #include "../utils/logging.hpp"
 #include "../utils/env.hpp"
 
 namespace data {
 
-	static std::vector<Result> result_list;
 	static std::vector<Problem> problem_list;
 
-	inline Result get_result(const std::string& id) {
-		for (const auto& result : result_list) {
-			if (result.id == id) return result;
-		}
-		throw std::runtime_error("Result ID is not exist in this node");
-	}
-
-	inline Problem get_problem(const std::string& id) {
+	inline const Problem* get_problem(const std::string& id) {
 		for (const auto& problem : problem_list) {
-			if (problem.id == id) return problem;
+			if (problem.id == id) return &problem;
 		}
 		throw std::runtime_error("Problem ID is not available in this node");
 	}

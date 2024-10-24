@@ -12,11 +12,13 @@ namespace api {
 
 	inline crow::response get_all_modules() {
 		std::vector<std::string> handlers;
-		for (const auto& key : handlers::modules | std::views::keys) {
+		for (const auto& key : modules::modules | std::views::keys) {
 			handlers.push_back(key);
 		}
 		const nlohmann::json j = handlers;
-		return {200, j.dump()};
+		crow::response resp = {200, j.dump()};
+		resp.add_header("Content-Type", "application/json");
+		return resp;
 	}
 
 	inline crow::response get_all_problems() {
@@ -25,7 +27,9 @@ namespace api {
 			problem_ids.push_back(problem.id);
 		}
 		const nlohmann::json j = problem_ids;
-		return {200, j.dump()};
+		crow::response resp = {200, j.dump()};
+		resp.add_header("Content-Type", "application/json");
+		return resp;
 	}
 
 }

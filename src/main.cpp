@@ -16,7 +16,6 @@ __  __            __
 #include <string>
 
 #include "api/info.hpp"
-#include "api/result.hpp"
 #include "api/submit.hpp"
 #include "data/problems.hpp"
 #include "data/storage.hpp"
@@ -34,7 +33,6 @@ namespace api {
         CROW_ROUTE(app, "/modules").methods(HTTPMethod::GET)(get_all_modules);
         CROW_ROUTE(app, "/problems").methods(HTTPMethod::GET)(get_all_problems);
         CROW_ROUTE(app, "/submit").methods(HTTPMethod::POST)(submit);
-        CROW_ROUTE(app, "/result").methods(HTTPMethod::GET)(result);
         return app;
     }
 
@@ -44,7 +42,7 @@ int main() {
     std::cout << LOGO;
     utils::load_env();
     logging::init();
-    handlers::init();
+    modules::init();
     data::scan_problems();
     const int port = stoi(utils::get_env("PORT", "4000"));
     const int threads = stoi(utils::get_env("THREADS", "4"));

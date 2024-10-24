@@ -44,9 +44,7 @@ namespace utils {
 				dup2(pipe_out[1], STDOUT_FILENO);
 
 				// Reset signal handler for SIGXCPU
-				struct sigaction sa{};
-				sa.sa_handler = SIG_DFL;
-				sigaction(SIGXCPU, &sa, nullptr);
+				// signal(SIGXCPU, SIG_DFL);
 
 				char* args[] = {const_cast<char*>(command), nullptr};
 

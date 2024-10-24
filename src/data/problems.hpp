@@ -9,10 +9,10 @@ namespace data {
 	struct TestCase {
 		std::string input, output;
 		TestCase(const std::string& problem_id, int test_case_no) {
-		    std::ifstream input_file("problems/" + problem_id + "/testcases/" + std::to_string(test_case_no) + ".in");
+		    std::ifstream input_file("problems/" + problem_id + "/testcases/" + std::to_string(test_case_no) + ".in", std::ios::binary);
 		    if (!input_file.is_open()) throw std::runtime_error("Failed to open input file of test case " + std::to_string(test_case_no));
 
-		    std::ifstream output_file("problems/" + problem_id + "/testcases/" + std::to_string(test_case_no) + ".out");;
+		    std::ifstream output_file("problems/" + problem_id + "/testcases/" + std::to_string(test_case_no) + ".out", std::ios::binary);;
 		    if (!output_file.is_open()) throw std::runtime_error("Failed to open output file of test case " + std::to_string(test_case_no));
 
 		    this->input = std::string((std::istreambuf_iterator<char>(input_file)), std::istreambuf_iterator<char>());

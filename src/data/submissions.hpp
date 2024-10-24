@@ -14,6 +14,8 @@ namespace data {
 		submission_status::Enum status = submission_status::Queued;
 		std::string message;
 
+		Submission() = default;
+
 		Submission(
 			const std::string& submission_id,
 			const std::string& problem_id,

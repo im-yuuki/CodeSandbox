@@ -16,7 +16,6 @@ add_executable(main
         src/utils/env.hpp
         src/utils/random.hpp
         src/utils/compare.hpp
-        src/utils/queue.hpp
         src/utils/runguard.hpp
 
         src/modules/c.hpp
@@ -26,9 +25,7 @@ add_executable(main
 
         src/api/info.hpp
         src/api/submit.hpp
-        src/api/result.hpp
 
-        src/data/results.hpp
         src/data/storage.hpp
 )
 
