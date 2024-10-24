@@ -35,7 +35,7 @@ jobs:
           cmake --build . --config Release
 
       - name: Upload executable as artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: code_sandbox_linux_x86_64
           path: build/main
