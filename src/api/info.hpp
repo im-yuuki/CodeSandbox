@@ -11,8 +11,8 @@
 namespace api {
 
 	inline crow::response get_all_modules() {
-		vector<string> handlers;
-		for (const auto& key : handlers::modules | views::keys) {
+		std::vector<std::string> handlers;
+		for (const auto& key : handlers::modules | std::views::keys) {
 			handlers.push_back(key);
 		}
 		const nlohmann::json j = handlers;
@@ -20,7 +20,7 @@ namespace api {
 	}
 
 	inline crow::response get_all_problems() {
-		vector<string> problem_ids;
+		std::vector<std::string> problem_ids;
 		for (const auto& problem : data::problem_list) {
 			problem_ids.push_back(problem.id);
 		}

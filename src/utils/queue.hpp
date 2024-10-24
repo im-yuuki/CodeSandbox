@@ -27,11 +27,13 @@ namespace queue {
         std::mutex mtx;
         std::condition_variable cv;
         std::thread worker_thread;
-        std::function<void(T)> task;
+        std::function<void(T*)> task;
         bool thread_running = false;
 
     public:
-        explicit ThreadSafeQueue(std::function<void(T&)> task) : task(task) {}
+        explicit ThreadSafeQueue(std::function<void(T*)> task) {
+            this->task = task;
+        }
 
         // Add an element to the queue and start a new thread if no thread is running
         void enqueue(T item) {
@@ -53,11 +55,11 @@ namespace queue {
         // Process the queue
         void processQueue() {
             while (true) {
-                T item;
+                T* item = nullptr;
                 {
                     std::unique_lock lock(mtx);
                     cv.wait(lock, [this] { return !queue.empty(); });
-                    item = std::move(queue.front());
+                    item = &queue.front();
                     queue.pop();
                 }
                 task(item);
@@ -85,18 +87,17 @@ namespace queue {
         }
     };
 
-    inline void processSubmission(data::Submission& submission) {
-        logger->info("Start processing for submission: {}", submission.id);
+    inline void processSubmission(data::Submission* submission) {
+        logger->info("Start processing for submission: {}", submission->id);
         try {
-            const data::Problem problem = data::get_problem(submission.problem_id);
-            handlers::IModules* handler = handlers::create_handler(submission, problem);
+            const data::Problem problem = data::get_problem(submission->problem_id);
+            handlers::IModules* handler = handlers::create_handler(*submission, problem);
             handler->run();
         } catch (const std::exception& e) {
-            submission.status = data::submission_status::InternalError;
-            submission.message = e.what();
+            submission->status = data::submission_status::InternalError;
+            submission->message = e.what();
         }
-        data::result_list.emplace_back(submission.id, submission.status, submission.message);
-        delete submission.file_content;
+        data::result_list.emplace_back(submission->id, submission->status, submission->message);
     }
 
     static ThreadSafeQueue<data::Submission> submission_queue(processSubmission);

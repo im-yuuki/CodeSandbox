@@ -15,11 +15,6 @@ namespace handlers {
 
 		void compile() override {
 			if (submission.status != data::submission_status::Running) return;
-			if (submission.file_content == nullptr) {
-				submission.status = data::submission_status::InternalError;
-				submission.message = "Submission content is null";
-				return;
-			}
 			std::ofstream source_file(work_dir + "/main.c");
 			source_file << submission.file_content;
 			source_file.close();

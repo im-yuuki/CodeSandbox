@@ -75,7 +75,7 @@ namespace utils {
 				close(pipe_out[1]); // Close write end of output pipe
 
 				// Write to the child process's stdin
-				write(pipe_in[1], input.c_str(), input.size());
+				if (write(pipe_in[1], input.c_str(), input.size()) == -1) logger->error("Failed to write input data to subprocess input");
 				close(pipe_in[1]); // Close write end after writing
 
 				// Read from the child process's stdout

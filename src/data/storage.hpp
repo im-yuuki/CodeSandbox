@@ -33,7 +33,7 @@ namespace data {
 		std::string line;
 		while (getline(file, line)) {
 			if (line.empty() || line[0] == '#') continue;
-			if (const size_t delimiter_pos = line.find('='); delimiter_pos != string::npos) {
+			if (const size_t delimiter_pos = line.find('='); delimiter_pos != std::string::npos) {
 				// Parse configuration file
 				std::string key = utils::trim(line.substr(0, delimiter_pos));
 				std::string value = utils::trim(line.substr(delimiter_pos + 1));
@@ -66,7 +66,6 @@ namespace data {
 				if (!entry.is_directory()) continue;
 				const std::string id = entry.path().filename().string();
 				problem_list.push_back(load_problem(id));
-				logger->info("Loaded problem ID: {}", id);
 				problems_count++;
 			} catch (const std::exception& e) {
 				logger->error("Failed to load problem {}: {}", entry.path().filename().string(), e.what());

@@ -12,7 +12,7 @@ namespace api {
 
 	inline crow::response result(const crow::request& req) {
 		const auto qs = crow::query_string(req.body);
-		const string submission_id = qs.get("submission_id");
+		const std::string submission_id = qs.get("submission_id");
 		if (submission_id.empty()) return {400, "Submission ID is required"};
 		try {
 			const auto [id, status, message] = data::get_result(submission_id);
