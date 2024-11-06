@@ -1,7 +1,7 @@
-name: Build CMake Project
+name: Build project
 
 on:
-  workflow_dispatch: # Manual trigger
+  workflow_dispatch:
 
 jobs:
   build:
@@ -19,27 +19,23 @@ jobs:
       - name: Set up vcpkg
         run: |
           git clone https://github.com/microsoft/vcpkg.git
-          cd vcpkg
-          ./bootstrap-vcpkg.sh
+          bash vcpkg/bootstrap-vcpkg.sh -disableMetrics
 
       - name: Install dependencies with vcpkg
         run: |
-          cd vcpkg
-          ./vcpkg install crow spdlog nlohmann-json
+          vcpkg/vcpkg install crow spdlog nlohmann-json
 
       - name: Configure CMake
         run: |
-          mkdir build
-          cd build
-          cmake .. -DCMAKE_TOOLCHAIN_FILE=$(pwd)/../vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++
-
+          cmake -DCMAKE_TOOLCHAIN_FILE=vcpkg/scripts/buildsystems/vcpkg.cmake -S . -B build -DCMAKE_CXX_COMPILER=g++
+           
       - name: Build the project
         run: |
           cd build
-          cmake --build . --config Release
+          make
 
       - name: Upload executable as artifact
         uses: actions/upload-artifact@v4
         with:
           name: code_sandbox_linux_x86_64
-          path: build/main
+          path: build/CodeSandbox

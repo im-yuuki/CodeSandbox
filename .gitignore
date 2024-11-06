@@ -1,4 +1,5 @@
 *build*/
+!github/workflows/*.yml
 .idea/
 .vscode/
 vcpkg/
