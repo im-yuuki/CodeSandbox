@@ -8,6 +8,7 @@
 #include "abstract.hpp"
 #include "c.hpp"
 #include "cpp.hpp"
+#include "rust.hpp"
 
 namespace modules {
 
@@ -35,6 +36,11 @@ namespace modules {
         for (const auto i : {"c++", "c++98", "c++11", "c++17"}) {
             register_handler(i, [](const data::Submission* submission, const data::Problem* problem) -> IModules* {
                 return new Cpp(submission, problem);
+            });
+        }
+        for (const auto i : {"rust", "rs"}) {
+            register_handler(i, [](const data::Submission* submission, const data::Problem* problem) -> IModules* {
+                return new Rust(submission, problem);
             });
         }
         logger->info("Registered {} handlers", modules.size());
