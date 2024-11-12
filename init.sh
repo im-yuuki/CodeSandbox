@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [ ! -d "vcpkg" ]; then
-    git clone https://github.com/microsoft/vcpkg.git
+    git clone https://github.com/microsoft/vcpkg.git --depth 1
     bash vcpkg/bootstrap-vcpkg.sh -disableMetrics
 fi
 vcpkg/vcpkg install crow spdlog nlohmann-json
