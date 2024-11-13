@@ -20,6 +20,9 @@ namespace modules {
                     if (!utils::token_compare(output_stream, output))
                         submission.status = data::submission_status::WrongAnswer;
                     else return;
+                } else if (WEXITSTATUS(run_guard.status) == EXIT_FAILURE) {
+                    submission.status = data::submission_status::RuntimeError;
+                    submission.message = run_guard.message;
                 }
             }
             else if (WIFSIGNALED(run_guard.status)) {
