@@ -8,7 +8,10 @@ namespace modules {
     private:
 
         void compile() override {
-            return;
+            if (submission.status != data::submission_status::Running) return;
+            std::ofstream source_file(work_dir + "/main.py", std::ios::binary);
+            source_file << submission.file_content;
+            source_file.close();
         }
 
         void test(const std::string& input, const std::string& output) override {

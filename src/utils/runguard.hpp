@@ -54,7 +54,7 @@ namespace utils {
 						args[arg_idx][i] = '\0';
 						arg_idx++;
 						args[arg_idx] = new char[32];
-						space_idx = i;
+						space_idx = i + 1;
 					}
 				}
 				args[arg_idx][i - space_idx] = '\0';
