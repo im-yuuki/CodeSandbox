@@ -22,6 +22,7 @@ add_executable(CodeSandbox
         src/modules/abstract.hpp
         src/modules/cpp.hpp
         src/modules/rust.hpp
+        src/modules/python.hpp
         src/modules/register.hpp
 
         src/api/info.hpp

@@ -9,6 +9,7 @@
 #include "c.hpp"
 #include "cpp.hpp"
 #include "rust.hpp"
+#include "python.hpp"
 
 namespace modules {
 
@@ -41,6 +42,11 @@ namespace modules {
         for (const auto i : {"rust", "rs"}) {
             register_handler(i, [](const data::Submission* submission, const data::Problem* problem) -> IModules* {
                 return new Rust(submission, problem);
+            });
+        }
+        for (const auto i : {"python", "py"}) {
+            register_handler(i, [](const data::Submission* submission, const data::Problem* problem) -> IModules* {
+                return new Python(submission, problem);
             });
         }
         logger->info("Registered {} handlers", modules.size());
