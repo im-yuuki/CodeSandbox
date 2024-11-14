@@ -21,7 +21,7 @@ namespace logging {
 	inline std::shared_ptr<spdlog::logger> create_logger(const std::string& name) {
 		const auto logger = std::make_shared<spdlog::logger>(spdlog::logger(name, { console_sink, file_sink }));
 		logger->set_level(spdlog::level::info);
-		logger->set_pattern("[%d-%m-%Y %H:%M:%S] <%t> %n [%^%l%$] %v");
+		logger->set_pattern("[%d-%m-%Y %H:%M:%S] %n [%^%l%$] %v");
 		return logger;
 	}
 

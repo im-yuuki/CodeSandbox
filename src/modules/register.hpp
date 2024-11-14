@@ -39,12 +39,12 @@ namespace modules {
                 return new Cpp(submission, problem);
             });
         }
-        for (const auto i : {"rust", "rs"}) {
+        for (const auto i : {"rust", "rust182"}) {
             register_handler(i, [](const data::Submission* submission, const data::Problem* problem) -> IModules* {
                 return new Rust(submission, problem);
             });
         }
-        for (const auto i : {"python", "py"}) {
+        for (const auto i : {"python", "python313"}) {
             register_handler(i, [](const data::Submission* submission, const data::Problem* problem) -> IModules* {
                 return new Python(submission, problem);
             });
