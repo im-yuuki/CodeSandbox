@@ -14,12 +14,14 @@ mkdir -p ./bin/
 rm -rf ./bin/python3
 echo "Extracting Python (IGNORE ERRORS, IT'll STILL WORK :D)..."
 tar -xzf python.tar.gz -C ./tmp/
-mv ./tmp/python/bin/ ./bin/python3
+mv ./tmp/python/ ./bin/python3
 # Cleanup
 rm -rf tmp python.tar.gz
 
 # Setup rust (MUST HAVE RUST INSTALLED THORUGH RUSTUP ALREADY)
-cp -r $HOME/.rustup/toolchains/stable-*-linux-gnu/bin bin/rust
+cp -r $HOME/.rustup/toolchains/stable-*-linux-gnu bin/rust
+# Removes unnecessary files
+rm -rf bin/rust/share/
 
 if [ ! -d "vcpkg" ]; then
     git clone https://github.com/microsoft/vcpkg.git --depth 1

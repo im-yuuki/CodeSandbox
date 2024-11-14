@@ -8,7 +8,10 @@ namespace modules {
     private:
 
         void compile() override {
-            return;
+            if (submission.status != data::submission_status::Running) return;
+            std::ofstream source_file(work_dir + "/main.py", std::ios::binary);
+            source_file << submission.file_content;
+            source_file.close();
         }
 
         void test(const std::string& input, const std::string& output) override {
@@ -20,6 +23,9 @@ namespace modules {
                     if (!utils::token_compare(output_stream, output))
                         submission.status = data::submission_status::WrongAnswer;
                     else return;
+                } else if (WEXITSTATUS(run_guard.status) == EXIT_FAILURE) {
+                    submission.status = data::submission_status::RuntimeError;
+                    submission.message = run_guard.message;
                 }
             }
             else if (WIFSIGNALED(run_guard.status)) {

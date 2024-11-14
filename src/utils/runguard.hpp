@@ -43,7 +43,24 @@ namespace utils {
 				dup2(pipe_in[0], STDIN_FILENO);
 				dup2(pipe_out[1], STDOUT_FILENO);
 
-				char* args[] = {const_cast<char*>(command), nullptr};
+				int arg_idx = 0;
+				int space_idx = 0;
+				int i = 0;
+				// char[32] probably enough to not get overflowed
+				char* args[3] = {new char[32], nullptr, nullptr};
+				for (i = 0; command[i] != '\0'; i++) {
+					args[arg_idx][i - space_idx] = command[i];
+					if (command[i] == ' ') {
+						args[arg_idx][i] = '\0';
+						arg_idx++;
+						args[arg_idx] = new char[32];
+						space_idx = i + 1;
+					}
+				}
+				args[arg_idx][i - space_idx] = '\0';
+				if (!space_idx) {
+					args[0] = const_cast<char*>(command);
+				}
 
 				// Set resource limits
 				if (memory_limit_mb) {
@@ -60,7 +77,7 @@ namespace utils {
 					alarm(time_limit_secs);
 				}
 
-				execvp(command, args);
+				execvp(args[0], args);
 
 				exit(EXIT_FAILURE);
 			}
