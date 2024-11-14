@@ -8,7 +8,7 @@ Môi trường chấm mã nguồn tự động dùng cho các cuộc thi lập t
 
 ## Cài đặt
 - Build: ...
-- Docker: [imyuuki/cpdesandbox](https://hub.docker.com/r/imyuuki/codesandbox/tags)
+- Docker: [imyuuki/codesandbox](https://hub.docker.com/r/imyuuki/codesandbox/tags)
 
 ## Cấu hình máy chủ HTTP
 Sử dụng các biến môi trường sau:
